@@ -16,12 +16,15 @@
 	<div ng-controller="ChatCtrl" class="container">
 		<div class="form-inline">
 			<div class="form-group">
-				<label>enter username</label>
-				<input type="text" class="form-control" ng-model="username" placeholder="enter username">
-			</div>
+				<label>enter username </label>
+				<input type="text" class="form-control" ng-model="user.name" placeholder="enter username">
+                <input type="text" class="form-control" ng-model="user.avatar" placeholder="enter username">
+                <button ng-click="{{sendUser()}}">send</button>
+
+            </div>
 		</div>
 
-		<h1>Chat {{username}} / {{clientID}}</h1>
+		<h1>Chat {{user.id}} / {{user.name}} / {{user.avatar}}</h1>
 
 		<br>
 
@@ -29,7 +32,8 @@
 			<tab ng-repeat="(key, value) in chat" heading="{{userlist[key].name}}" active="tab.active"
 				 select="selectChat(key)"
 				 disabled="tab.disabled">
-				<li ng-repeat="message in value.massages track by $index">{{message.time}}/{{message.dir}}/{{message.text}}
+				<li ng-repeat="message in value.massages track by $index">{{message.time}}/{{message.server
+                    .js}}/{{message.text}}
 				</li>
 			</tab>
 			<tab select="newChat()" heading="new Chat">

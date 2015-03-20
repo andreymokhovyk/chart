@@ -12,13 +12,18 @@ sock.onclose = function() {
 
 
 var app = angular.module('Chart', ['ui.bootstrap']);
+
 app.controller('ChatCtrl', function ($scope) {
-	$scope.clientID = '';
 	$scope.currentChat = {}
 	$scope.currentChat.id = '';
 
 	$scope.userlist = {};
 	$scope.chat = {};
+	$scope.user = {
+		id:'',
+		name:'',
+		avatar:''
+	};
 
 	$scope.selectChat = function(key) {
 		$scope.currentChat.id = key;
@@ -28,13 +33,16 @@ app.controller('ChatCtrl', function ($scope) {
 		$scope.currentChat.id = '';
 	};
 
-
+	$scope.$watchCollection('user', function(newVal, oldVal){
+		console.log('changed us');
+		//$scope.sendUser();
+	});
 
 	$scope.sendMessage = function() {
 		var msg = {
 			type: "message",
 			message: $scope.messageText,
-			dialog: [$scope.clientID, $scope.currentChat.id],
+			dialog: [$scope.user.id, $scope.currentChat.id],
 			date: Date.now()
 		};
 
@@ -43,22 +51,34 @@ app.controller('ChatCtrl', function ($scope) {
 		$scope.messageText = "";
 	};
 
+	$scope.sendUser = function() {
+		var msg = {
+			type: "user",
+			message: $scope.user,
+			dialog: [$scope.user.id],
+			date: Date.now()
+		};
+
+		sock.send(JSON.stringify(msg));
+	};
 
   	sock.onmessage = function(e) {
 		console.log(e.data)
 
 		var msg = JSON.parse(e.data);
-		var user = msg.dialog[0] == $scope.clientID ? msg.dialog[1] : msg.dialog[0];
-		var dir = msg.dialog[0] == $scope.clientID ? 'outbox' : 'inbox';
+		var user = msg.dialog[0] == $scope.user.id ? msg.dialog[1] : msg.dialog[0];
+		var dir = msg.dialog[0] == $scope.user.id ? 'outbox' : 'inbox';
 		var time = new Date(msg.date);
 		var timeStr = time.toLocaleTimeString();
 
 		switch(msg.type) {
 
-			case "id":
-				$scope.clientID = msg.message;
+			case 'id':
+				$scope.user.id = msg.message.id;
+				$scope.user.name = msg.message.name;
+				$scope.user.avatar = msg.message.avatar;
 				break;
-			case "message":
+			case 'message':
 				console.log('message');
 				console.log(msg);
 
@@ -79,7 +99,7 @@ app.controller('ChatCtrl', function ($scope) {
 
 				break;
 
-			case "userlist":
+			case 'userlist':
 				console.log('user');
 
 				$scope.userlist = msg.message;

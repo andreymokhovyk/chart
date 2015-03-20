@@ -51,34 +51,50 @@ function createMessage(type, users, message, date) {
 
 chat.on('connection', function(conn) {
 	count++;
+	var connID = conn.id;
 
-	conn.write(createMessage('id', ['serverID'], conn.id));
-
-	clients[conn.id] = conn;
-
-	userlist[conn.id] = {};
-	userlist[conn.id]['name'] = 'user'+count;
-	userlist[conn.id]['avatar'] = 'img';
+	clients[connID] = conn;
 
 
+	var user = {
+		id : connID,
+		name: 'user'+count,
+		avatar: 'img'
+	}
+
+	userlist[connID] = {};
+	userlist[connID].name = user.name;
+	userlist[connID].avatar = user.avatar;
+
+	conn.write(createMessage('id', ['serverID'], user));
 	broadcast(createMessage('userlist', ['serverID'], userlist));
 
-
-	conn.write(createMessage('message', ['serverID', conn.id], 'Hello on chat'));
+	conn.write(createMessage('message', ['serverID', connID], 'Hello on chat'));
 
 
 	conn.on('data', function(data) {
 
 		var data =  JSON.parse(data)
-		console.log(data)
-		broadcast(createMessage('message', data.dialog, data.message, data.date), data.dialog);
+
+		switch(data.type) {
+			case 'message':
+				broadcast(createMessage('message', data.dialog, data.message, data.date), data.dialog);
+				break;
+			case 'user':
+				data = data.message
+				userlist[data.id].name = data.name;
+				userlist[data.id].avatar = data.avatar;
+				broadcast(createMessage('userlist', ['serverID'], userlist));
+			break;
+		}
+
 	});
 
 
 	// on connection close event
 	conn.on('close', function() {
-		delete clients[conn.id];
-		delete userlist[conn.id];
+		delete clients[connID];
+		delete userlist[connID];
 
 		broadcast(createMessage('userlist', ['serverID'], userlist));
 	});
