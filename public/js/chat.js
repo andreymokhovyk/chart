@@ -45,7 +45,7 @@ app.controller('ChatCtrl', function ($scope) {
 			dialog: [$scope.user.id, $scope.currentChat.id],
 			date: Date.now()
 		};
-
+console.log(msg)
 		sock.send(JSON.stringify(msg));
 
 		$scope.messageText = "";
@@ -58,7 +58,8 @@ app.controller('ChatCtrl', function ($scope) {
 			dialog: [$scope.user.id],
 			date: Date.now()
 		};
-
+		console.log('sendUser')
+		console.log(msg)
 		sock.send(JSON.stringify(msg));
 	};
 
@@ -100,9 +101,10 @@ app.controller('ChatCtrl', function ($scope) {
 				break;
 
 			case 'userlist':
-				console.log('user');
-
+				console.log('userlist');
+				console.log($scope.userlist);
 				$scope.userlist = msg.message;
+								console.log($scope.userlist);
 				$scope.$apply();
 
 				break;
