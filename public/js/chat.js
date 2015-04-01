@@ -45,7 +45,7 @@ app.controller('ChatCtrl', function ($scope) {
 			dialog: [$scope.user.id, $scope.currentChat.id],
 			date: Date.now()
 		};
-console.log(msg)
+console.log(msg2)
 		sock.send(JSON.stringify(msg));
 
 		$scope.messageText = "";
